@@ -1,58 +1,44 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 
 import MonsterList from "./components/monster-list/monster-list.component";
 import SearchBox from "./components/search-box/search-box.component";
 
 import "./App.css";
 
-class App extends Component {
-  constructor() {
-    super();
+const App = () => {
+  const [monsters, setMonsters] = useState([]);
+  const [filteredMonsters, setFilteredMonsters] = useState([]);
 
-    this.state = {
-      monsters: [],
-      searchString: "",
-    };
-  }
-
-  componentDidMount() {
+  useEffect(() => {
     fetch("https://jsonplaceholder.typicode.com/users")
       .then((response) => response.json())
-      .then((users) =>
-        this.setState(
-          () => {
-            return { monsters: users, filteredMonsters: users };
-          },
-          () => console.log(this.state)
-        )
-      );
-  }
+      .then((users) => {
+        setMonsters(users);
+        setFilteredMonsters(users);
+      });
+  }, []);
 
-  onSearchChange = (e) => {
+  const onSearchChange = (e) => {
     const searchString = e.target.value.toLowerCase();
-    this.setState({ searchString });
+    const newFilteredMonsters = monsters.filter((monster) => {
+      return monster.name.toLowerCase().includes(searchString);
+    });
+    setFilteredMonsters(newFilteredMonsters);
   };
 
-  render() {
-    const { monsters, searchString } = this.state;
-    const { onSearchChange } = this;
-    const filteredMonsters = monsters.filter((monster) =>
-      monster.name.toLowerCase().includes(searchString)
-    );
-    return (
-      <div className="App">
-        <h1 className="app-title">Monsters Rolodex</h1>
+  return (
+    <div className="App">
+      <h1 className="app-title">Monsters Rolodex</h1>
 
-        <SearchBox
-          onSearchChange={onSearchChange}
-          className="monster-search-box"
-          placeholder="search monsters"
-        />
+      <SearchBox
+        onSearchChange={onSearchChange}
+        className="monster-search-box"
+        placeholder="search monsters"
+      />
 
-        <MonsterList monsters={filteredMonsters} />
-      </div>
-    );
-  }
-}
+      <MonsterList monsters={filteredMonsters} />
+    </div>
+  );
+};
 
 export default App;
